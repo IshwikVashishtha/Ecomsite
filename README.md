@@ -109,8 +109,6 @@ Visit [http://127.0.0.1:8000/](http://127.0.0.1:8000/) in your browser.
 - **Checkout:** Fill in the form and submit to place an order.
 - **Admin:** Visit `/admin/` to manage products and orders (login as superuser).
 
-## Screenshots
-> _Add screenshots of your app here for better presentation._
 
 ## Contributing
 1. Fork the repository
