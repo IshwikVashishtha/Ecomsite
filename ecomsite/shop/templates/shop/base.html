@@ -1,0 +1,185 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shop{% block title %} {% endblock %}</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://code.jquery.com/jquery-3.7.1.js"
+      integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
+      crossorigin="anonymous"
+    ></script>
+    <link rel="stylesheet" href="{% static 'shop/style.css' %}" />
+  </head>
+  <body>
+    <div class="row">
+      <div class="col-md-12">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+          <div class="container-fluid">
+            <a class="navbar-brand" href="/">Navbar</a>
+            <button
+              class="navbar-toggler"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#navbarSupportedContent"
+              aria-controls="navbarSupportedContent"
+              aria-expanded="false"
+              aria-label="Toggle navigation"
+            >
+              <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                  <a class="nav-link active" aria-current="page" href="/"
+                    >Home</a
+                  >
+                </li>
+                <li class="nav-item">
+                 <button
+  type="button"
+  id="cart"
+  class="btn btn-outline-primary"
+  data-bs-toggle="popover"
+  data-bs-html="true"
+  data-bs-trigger="focus"
+  data-bs-placement="bottom"
+  title="Cart Items"
+  data-bs-content="Loading..."
+>
+  Cart(0)
+</button>
+
+
+                </li>
+                <li class="nav-item dropdown" >
+                  <a
+                    class="nav-link dropdown-toggle"
+                    href="#"
+                    id="navbarDropdown"
+                    role="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                  >
+                    dropdown
+                  </a>
+                  <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <li><a class="dropdown-item" href="#">Action</a></li>
+                    <li>
+                      <a class="dropdown-item" href="#">Another action</a>
+                    </li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <li>
+                      <a class="dropdown-item" href="#">Something else here</a>
+                    </li>
+                  </ul>
+                </li>
+                <li class="nav-item">
+                  <a
+                    class="nav-link disabled"
+                    href="#"
+                    tabindex="-1"
+                    aria-disabled="true"
+                    >Disabled</a
+                  >
+                </li>
+              </ul>
+              </form>
+            </div>
+          </div>
+        </nav>
+      </div>
+    </div>
+    {% block body %} {% endblock %}
+
+<script type="text/javascript">
+  document.addEventListener("DOMContentLoaded", function () {
+    const cartBtn = document.getElementById("cart");
+    let cart = JSON.parse(localStorage.getItem("cart")) || {};
+
+    // Update cart count
+    function updateCartCount() {
+      cartBtn.innerHTML = 'Cart(' + Object.keys(cart).length + ')';
+    }
+
+    // Create HTML for popover
+    function generatePopoverHTML() {
+      let html = '<ul class="list-group list-group-flush">';
+      if (Object.keys(cart).length === 0) {
+        html += '<li class="list-group-item">Your cart is empty</li>';
+      } else {
+        for (let itemId in cart) {
+          const item = cart[itemId];
+          html += `
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <div>
+                <strong>${item.name}</strong><br>
+                Qty: ${item.qty}
+              </div>
+              <button class="btn btn-sm btn-danger remove-item" data-id="${itemId}">&times;</button>
+            </li>`;
+        }
+      }
+      html += '</ul>';
+      html +='<a class="btn btn-warning" id="checkout" href="/checkout/" role="button" type="button">Checkout</a>';
+      return html;
+    }
+
+    // Reinitialize popover
+    function refreshPopover() {
+      const content = generatePopoverHTML();
+      bootstrap.Popover.getInstance(cartBtn)?.dispose();
+      cartBtn.setAttribute("data-bs-content", content);
+      new bootstrap.Popover(cartBtn, {
+        html: true,
+        trigger: "click",
+        placement: "bottom"
+      });
+    }
+
+    // Initial setup
+    updateCartCount();
+    refreshPopover();
+
+    // Event delegation
+    document.addEventListener("click", function (e) {
+      let target = e.target.closest("button");
+
+      // Add to cart
+      if (target && target.classList.contains("add_to_cart")) {
+        const itemId = target.id;
+        const itemName = target.getAttribute("data-name");
+        const itemImage = target.getAttribute("data-image");
+        const itemPrice = target.getAttribute("data-price");
+
+        if (!itemId || !itemName) return;
+
+        if (cart[itemId]) {
+          cart[itemId].qty += 1;
+        } else {
+          cart[itemId] = { name: itemName, qty: 1 , image:itemImage , price:itemPrice };
+        }
+
+        localStorage.setItem("cart", JSON.stringify(cart));
+        updateCartCount();
+        refreshPopover();
+      }
+    });
+  });
+</script>
+
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>

@@ -1,0 +1,120 @@
+{% extends 'shop/base.html' %}
+{% block title %}Cart{% endblock %}
+{% block body %}
+<div class="container mt-5">
+  <h2 class="mb-4">My Cart</h2>
+  <div id="cart-items" class="row">
+
+    <!-- JS will populate items here -->
+
+  </div>
+<form id="checkout-form" method="POST">
+  {% csrf_token %}
+  <div class="container mt-5">
+    <div class="form-row">
+      <div class="form-group col-md-6">
+        <label for="inputName">Name</label>
+        <input type="text" class="form-control" name="inputName" placeholder="Name" required>
+      </div>
+      <div class="form-group col-md-6">
+        <label for="inputEmail4">Email</label>
+        <input type="email" class="form-control" name="inputEmail4" placeholder="Email" required>
+      </div>
+      <div class="form-group col-md-6">
+        <label for="inputPassword4">Password</label>
+        <input type="password" class="form-control" name="inputPassword4" placeholder="Password" required>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="inputAddress">Address</label>
+      <input type="text" class="form-control" name="inputAddress" placeholder="1234 Main St" required>
+    </div>
+    <div class="form-row">
+      <div class="form-group col-md-6">
+        <label for="inputCity">City</label>
+        <input type="text" class="form-control" name="inputCity" required>
+      </div>
+      <div class="form-group col-md-4">
+        <label for="inputState">State</label>
+        <input type="text" class="form-control" name="inputState" required>
+      </div>
+      <div class="form-group col-md-2">
+        <label for="inputZip">Zip</label>
+        <input type="text" class="form-control" name="inputZip" required>
+      </div>
+      <input type="hidden" id="items" name="items">
+      <input type="hidden" id="total" name="total">
+    </div>
+
+    <div class="mt-4 p-3 bg-light border rounded text-end">
+      <h5>Total Items: <span id="total-items">0</span></h5>
+      <h5>Total Price:₹<span id="total-price">0</span></h5>
+      <button type="submit" class="btn btn-success">Proceed to Checkout</button>
+    </div>
+  </div>
+</form>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    let cart = JSON.parse(localStorage.getItem("cart")) || {};
+    let container = document.getElementById("cart-items");
+    let totalItems = 0;
+    let totalPrice = 0;
+
+    if (Object.keys(cart).length === 0) {
+      container.innerHTML = '<p class="text-center text-muted">Your cart is empty.</p>';
+    } else {
+      // Clear container first
+      container.innerHTML = '';
+
+      for (let itemId in cart) {
+        const item = cart[itemId];
+        totalItems += item.qty;
+        totalPrice += item.price * item.qty;
+
+
+        container.innerHTML += `
+          <div class="col-md-12 mb-3">
+            <div class="card shadow-sm p-3 d-flex flex-row justify-content-between align-items-center">
+              <div class="d-flex align-items-center">
+                <img src="${item.image || '/static/images/default.jpg'}" 
+                     alt="${item.name}" 
+                     width="80" 
+                     height="80" 
+                     class="me-3 border rounded object-fit-cover">
+                <div>
+                  <h5 class="mb-1">${item.name}</h5>
+                  <p class="mb-0">Quantity: ${item.qty}</p>
+                  <p class="mb-0">Price:₹${item.price}</p>
+                </div>
+              </div>
+              <button class="btn btn-danger btn-sm remove-item" data-id="${itemId}">Remove</button>
+            </div>
+          </div>`;
+      }
+
+      document.getElementById("total-items").innerText = totalItems;
+      document.getElementById("total-price").innerText = totalPrice;
+    }
+
+    // Remove item functionality
+    document.addEventListener("click", function (e) {
+      if (e.target.classList.contains("remove-item")) {
+        const id = e.target.getAttribute("data-id");
+        if (id && cart[id]) {
+          delete cart[id];
+          localStorage.setItem("cart", JSON.stringify(cart));
+          location.reload(); // Refresh page to update UI
+        }
+      }
+      $('#items').val(JSON.stringify(cart))
+      $("#total").val(totalPrice)
+      
+    });
+  });
+</script>
+
+{% endblock %}
+
+
