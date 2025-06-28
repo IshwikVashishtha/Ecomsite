@@ -66,7 +66,7 @@ ecomsite/
 
 ### 1. Clone the Repository
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/IshwikVashishtha/Ecomsite.git
 cd ecomsite
 ```
 
@@ -117,5 +117,3 @@ Visit [http://127.0.0.1:8000/](http://127.0.0.1:8000/) in your browser.
 4. Push to the branch (`git push origin feature/YourFeature`)
 5. Open a Pull Request
 
-## License
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details. 
