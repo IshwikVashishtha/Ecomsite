@@ -7,7 +7,6 @@
 - [Project Structure](#project-structure)
 - [Setup & Installation](#setup--installation)
 - [Usage](#usage)
-- [Screenshots](#screenshots)
 - [Contributing](#contributing)
 - [License](#license)
 
