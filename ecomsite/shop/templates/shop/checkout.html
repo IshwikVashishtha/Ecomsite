@@ -1,120 +1,138 @@
 {% extends 'shop/base.html' %}
+{% load static %}
 {% block title %}Cart{% endblock %}
+{% block style %}<link rel="stylesheet" href="{% static 'shop/checkout.css' %}" />{% endblock %}
 {% block body %}
-<div class="container mt-5">
-  <h2 class="mb-4">My Cart</h2>
-  <div id="cart-items" class="row">
 
-    <!-- JS will populate items here -->
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <h2 class="mb-4">My Cart</h2>
+            <div id="cart-items" class="row">
+                </div>
+            <div id="cart-empty-message" class="text-center text-muted" style="display: none;">
+                Your cart is empty.
+            </div>
+        </div>
 
-  </div>
-<form id="checkout-form" method="POST">
-  {% csrf_token %}
-  <div class="container mt-5">
-    <div class="form-row">
-      <div class="form-group col-md-6">
-        <label for="inputName">Name</label>
-        <input type="text" class="form-control" name="inputName" placeholder="Name" required>
-      </div>
-      <div class="form-group col-md-6">
-        <label for="inputEmail4">Email</label>
-        <input type="email" class="form-control" name="inputEmail4" placeholder="Email" required>
-      </div>
-      <div class="form-group col-md-6">
-        <label for="inputPassword4">Password</label>
-        <input type="password" class="form-control" name="inputPassword4" placeholder="Password" required>
-      </div>
+        <div class="col-lg-4">
+            <div class="checkout-form-container">
+                <h4 class="mb-4">Checkout Details</h4>
+                <form id="checkout-form" method="POST">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="inputName" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="inputName" name="inputName" placeholder="Full Name" required>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label for="inputEmail4" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="inputEmail4" name="inputEmail4" placeholder="Email" required>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label for="inputPassword4" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="inputPassword4" name="inputPassword4" placeholder="Password" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="inputAddress" class="form-label">Address</label>
+                        <input type="text" class="form-control" id="inputAddress" name="inputAddress" placeholder="1234 Main St" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="inputCity" class="form-label">City</label>
+                            <input type="text" class="form-control" id="inputCity" name="inputCity" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="inputState" class="form-label">State</label>
+                            <input type="text" class="form-control" id="inputState" name="inputState" required>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <label for="inputZip" class="form-label">Zip</label>
+                            <input type="text" class="form-control" id="inputZip" name="inputZip" required>
+                        </div>
+                    </div>
+                    <input type="hidden" id="items" name="items">
+                    <input type="hidden" id="total" name="total">
+                    <div class="mt-4 p-3 bg-light border rounded text-end">
+                        <h5 class="total-summary-items">Total Items: <span id="total-items">0</span></h5>
+                        <h5 class="total-summary-price">Total Price: ₹<span id="total-price">0</span></h5>
+                        <button type="submit" class="btn btn-success w-100 mt-3">
+                            Proceed to Checkout
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-
-    <div class="form-group">
-      <label for="inputAddress">Address</label>
-      <input type="text" class="form-control" name="inputAddress" placeholder="1234 Main St" required>
-    </div>
-    <div class="form-row">
-      <div class="form-group col-md-6">
-        <label for="inputCity">City</label>
-        <input type="text" class="form-control" name="inputCity" required>
-      </div>
-      <div class="form-group col-md-4">
-        <label for="inputState">State</label>
-        <input type="text" class="form-control" name="inputState" required>
-      </div>
-      <div class="form-group col-md-2">
-        <label for="inputZip">Zip</label>
-        <input type="text" class="form-control" name="inputZip" required>
-      </div>
-      <input type="hidden" id="items" name="items">
-      <input type="hidden" id="total" name="total">
-    </div>
-
-    <div class="mt-4 p-3 bg-light border rounded text-end">
-      <h5>Total Items: <span id="total-items">0</span></h5>
-      <h5>Total Price:₹<span id="total-price">0</span></h5>
-      <button type="submit" class="btn btn-success">Proceed to Checkout</button>
-    </div>
-  </div>
-</form>
+</div>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    let cart = JSON.parse(localStorage.getItem("cart")) || {};
-    let container = document.getElementById("cart-items");
-    let totalItems = 0;
-    let totalPrice = 0;
+    document.addEventListener("DOMContentLoaded", function () {
+        let cart = JSON.parse(localStorage.getItem("cart")) || {};
+        const cartItemsContainer = document.getElementById("cart-items");
+        const emptyMessage = document.getElementById("cart-empty-message");
+        const totalItemsSpan = document.getElementById("total-items");
+        const totalPriceSpan = document.getElementById("total-price");
+        const formItemsInput = document.getElementById("items");
+        const formTotalInput = document.getElementById("total");
 
-    if (Object.keys(cart).length === 0) {
-      container.innerHTML = '<p class="text-center text-muted">Your cart is empty.</p>';
-    } else {
-      // Clear container first
-      container.innerHTML = '';
+        function updateCartDisplay() {
+            let totalItems = 0;
+            let totalPrice = 0;
+            cartItemsContainer.innerHTML = ''; // Clear container
 
-      for (let itemId in cart) {
-        const item = cart[itemId];
-        totalItems += item.qty;
-        totalPrice += item.price * item.qty;
+            if (Object.keys(cart).length === 0) {
+                emptyMessage.style.display = 'block';
+            } else {
+                emptyMessage.style.display = 'none';
+                for (let itemId in cart) {
+                    const item = cart[itemId];
+                    totalItems += item.qty;
+                    totalPrice += item.price * item.qty;
 
+                    const itemHtml = `
+                        <div class="col-12 mb-3">
+                            <div class="card shadow-sm p-3 cart-item-card">
+                                <div class="d-flex align-items-center">
+                                    <img src="${item.image || '/static/images/default.jpg'}" 
+                                         alt="${item.name}" 
+                                         class="cart-item-image me-3">
+                                    <div class="flex-grow-1">
+                                        <h5 class="mb-1">${item.name}</h5>
+                                        <p class="text-muted mb-0">Qty: ${item.qty} | Price: ₹${item.price}</p>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-danger remove-item ms-auto" data-id="${itemId}">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>`;
+                    cartItemsContainer.innerHTML += itemHtml;
+                }
+            }
 
-        container.innerHTML += `
-          <div class="col-md-12 mb-3">
-            <div class="card shadow-sm p-3 d-flex flex-row justify-content-between align-items-center">
-              <div class="d-flex align-items-center">
-                <img src="${item.image || '/static/images/default.jpg'}" 
-                     alt="${item.name}" 
-                     width="80" 
-                     height="80" 
-                     class="me-3 border rounded object-fit-cover">
-                <div>
-                  <h5 class="mb-1">${item.name}</h5>
-                  <p class="mb-0">Quantity: ${item.qty}</p>
-                  <p class="mb-0">Price:₹${item.price}</p>
-                </div>
-              </div>
-              <button class="btn btn-danger btn-sm remove-item" data-id="${itemId}">Remove</button>
-            </div>
-          </div>`;
-      }
-
-      document.getElementById("total-items").innerText = totalItems;
-      document.getElementById("total-price").innerText = totalPrice;
-    }
-
-    // Remove item functionality
-    document.addEventListener("click", function (e) {
-      if (e.target.classList.contains("remove-item")) {
-        const id = e.target.getAttribute("data-id");
-        if (id && cart[id]) {
-          delete cart[id];
-          localStorage.setItem("cart", JSON.stringify(cart));
-          location.reload(); // Refresh page to update UI
+            totalItemsSpan.innerText = totalItems;
+            totalPriceSpan.innerText = totalPrice.toFixed(2);
+            formItemsInput.value = JSON.stringify(cart);
+            formTotalInput.value = totalPrice.toFixed(2);
         }
-      }
-      $('#items').val(JSON.stringify(cart))
-      $("#total").val(totalPrice)
-      
+
+        // Handle item removal
+        cartItemsContainer.addEventListener("click", function (e) {
+            const removeBtn = e.target.closest(".remove-item");
+            if (removeBtn) {
+                const id = removeBtn.getAttribute("data-id");
+                if (id && cart[id]) {
+                    delete cart[id];
+                    localStorage.setItem("cart", JSON.stringify(cart));
+                    updateCartDisplay(); // Update UI without reloading
+                }
+            }
+        });
+
+        updateCartDisplay();
     });
-  });
 </script>
 
 {% endblock %}
-
-

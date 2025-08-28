@@ -1,185 +1,282 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Shop{% block title %} {% endblock %}</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr"
-      crossorigin="anonymous"
-    />
-    <script
-      src="https://code.jquery.com/jquery-3.7.1.js"
-      integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
-      crossorigin="anonymous"
-    ></script>
-    <link rel="stylesheet" href="{% static 'shop/style.css' %}" />
-  </head>
-  <body>
-    <div class="row">
-      <div class="col-md-12">
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-          <div class="container-fluid">
-            <a class="navbar-brand" href="/">Navbar</a>
-            <button
-              class="navbar-toggler"
-              type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#navbarSupportedContent"
-              aria-controls="navbarSupportedContent"
-              aria-expanded="false"
-              aria-label="Toggle navigation"
-            >
-              <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-              <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                  <a class="nav-link active" aria-current="page" href="/"
-                    >Home</a
-                  >
-                </li>
-                <li class="nav-item">
-                 <button
-  type="button"
-  id="cart"
-  class="btn btn-outline-primary"
-  data-bs-toggle="popover"
-  data-bs-html="true"
-  data-bs-trigger="focus"
-  data-bs-placement="bottom"
-  title="Cart Items"
-  data-bs-content="Loading..."
->
-  Cart(0)
-</button>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shop{% block title %} {% endblock %}</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script
+      src="https://code.jquery.com/jquery-3.7.1.js"
+      integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
+      crossorigin="anonymous"
+    ></script>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    {% block style %}{% endblock %}
+  </head>
+<style>
+  body {
+  background-color: #F5F5F5;
+  color: #333333;
+}
 
+/* === Navbar Styles === */
+.navbar {
+  border-bottom: 1px solid #e0e0e0;
+}
 
-                </li>
-                <li class="nav-item dropdown" >
-                  <a
-                    class="nav-link dropdown-toggle"
-                    href="#"
-                    id="navbarDropdown"
-                    role="button"
-                    data-bs-toggle="dropdown"
-                    aria-expanded="false"
-                  >
-                    dropdown
-                  </a>
-                  <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    <li><a class="dropdown-item" href="#">Action</a></li>
-                    <li>
-                      <a class="dropdown-item" href="#">Another action</a>
-                    </li>
-                    <li><hr class="dropdown-divider" /></li>
-                    <li>
-                      <a class="dropdown-item" href="#">Something else here</a>
-                    </li>
-                  </ul>
-                </li>
-                <li class="nav-item">
-                  <a
-                    class="nav-link disabled"
-                    href="#"
-                    tabindex="-1"
-                    aria-disabled="true"
-                    >Disabled</a
-                  >
-                </li>
-              </ul>
-              </form>
-            </div>
-          </div>
-        </nav>
-      </div>
-    </div>
-    {% block body %} {% endblock %}
+.navbar-brand {
+  color: #4ECDC4 !important;
+  font-weight: 700;
+  font-size: 1.5rem;
+}
+
+.nav-link {
+  color: #555555 !important;
+  font-weight: 500;
+  margin-right: 1rem;
+  transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+  color: #000000 !important;
+}
+
+/* === Cart Button Styles === */
+.btn-outline-primary {
+  color: #4ECDC4;
+  border-color: #4ECDC4;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary.cart-active {
+  background-color: #4ECDC4;
+  color: #fff;
+}
+
+.cart-added {
+  animation: cart-pulse 0.5s ease-in-out;
+}
+
+@keyframes cart-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* === Popover & Cart Items Styles === */
+.popover {
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  min-width: 300px;
+}
+
+.popover-header {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.list-group-item {
+  border: none;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.list-group-item:last-child {
+  border-bottom: none;
+}
+
+.cart-item-image {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.remove-item {
+  background-color: transparent;
+  border: none;
+  color: #dc3545;
+  font-size: 1.25rem;
+  transition: color 0.3s ease;
+}
+
+.remove-item:hover {
+  color: #a71d2a;
+}
+
+.btn-checkout {
+  background-color: #4ECDC4;
+  color: #fff;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+  border: none;
+}
+
+.btn-checkout:hover {
+  background-color: #3ba39b;
+}
+</style>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white py-3 shadow-sm">
+      <div class="container-fluid">
+        <a class="navbar-brand fw-bold fs-4 text-primary" href="/">MyShop</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="/">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Dropdown
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <li><a class="dropdown-item" href="#">Action</a></li>
+                <li><a class="dropdown-item" href="#">Another action</a></li>
+                <li><hr class="dropdown-divider" /></li>
+                <li><a class="dropdown-item" href="#">Something else here</a></li>
+              </ul>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+            </li>
+          </ul>
+          <div class="d-flex ms-auto">
+            <button
+              type="button"
+              id="cart"
+              class="btn btn-outline-primary"
+              data-bs-toggle="popover"
+              data-bs-html="true"
+              data-bs-trigger="focus"
+              data-bs-placement="bottom"
+              title="Your Cart"
+              data-bs-content="Loading..."
+            >
+              <i class="bi bi-cart3"></i> Cart (<span id="cart-count">0</span>)
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+    {% block body %} {% endblock %}
 
 <script type="text/javascript">
-  document.addEventListener("DOMContentLoaded", function () {
-    const cartBtn = document.getElementById("cart");
-    let cart = JSON.parse(localStorage.getItem("cart")) || {};
+  document.addEventListener("DOMContentLoaded", function () {
+    const cartBtn = document.getElementById("cart");
+    const cartCountSpan = document.getElementById("cart-count");
+    let cart = JSON.parse(localStorage.getItem("cart")) || {};
 
-    // Update cart count
-    function updateCartCount() {
-      cartBtn.innerHTML = 'Cart(' + Object.keys(cart).length + ')';
-    }
+    function updateCartCount() {
+      const count = Object.keys(cart).length;
+      cartCountSpan.textContent = count;
+      if (count > 0) {
+        cartBtn.classList.add('cart-active');
+      } else {
+        cartBtn.classList.remove('cart-active');
+      }
+    }
 
-    // Create HTML for popover
-    function generatePopoverHTML() {
-      let html = '<ul class="list-group list-group-flush">';
-      if (Object.keys(cart).length === 0) {
-        html += '<li class="list-group-item">Your cart is empty</li>';
-      } else {
-        for (let itemId in cart) {
-          const item = cart[itemId];
-          html += `
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-              <div>
-                <strong>${item.name}</strong><br>
-                Qty: ${item.qty}
-              </div>
-              <button class="btn btn-sm btn-danger remove-item" data-id="${itemId}">&times;</button>
-            </li>`;
-        }
-      }
-      html += '</ul>';
-      html +='<a class="btn btn-warning" id="checkout" href="/checkout/" role="button" type="button">Checkout</a>';
-      return html;
-    }
+    function generatePopoverHTML() {
+      let html = '<ul class="list-group list-group-flush">';
+      if (Object.keys(cart).length === 0) {
+        html += '<li class="list-group-item text-center text-muted">Your cart is empty</li>';
+      } else {
+        for (let itemId in cart) {
+          const item = cart[itemId];
+          html += `
+            <li class="list-group-item d-flex align-items-center py-2">
+              <img src="${item.image}" alt="${item.name}" class="cart-item-image me-3">
+              <div class="flex-grow-1">
+                <strong class="d-block">${item.name}</strong>
+                <small class="text-muted">Qty: ${item.qty} | Price: ₹${item.price}</small>
+              </div>
+              <button class="btn btn-sm btn-danger remove-item ms-auto" data-id="${itemId}">
+                <i class="bi bi-trash"></i>
+              </button>
+            </li>`;
+        }
+      }
+      html += '</ul>';
+      html += '<a class="btn btn-checkout mt-3 w-100" href="/checkout/" role="button">Checkout</a>';
+      return html;
+    }
 
-    // Reinitialize popover
-    function refreshPopover() {
-      const content = generatePopoverHTML();
-      bootstrap.Popover.getInstance(cartBtn)?.dispose();
-      cartBtn.setAttribute("data-bs-content", content);
-      new bootstrap.Popover(cartBtn, {
-        html: true,
-        trigger: "click",
-        placement: "bottom"
-      });
-    }
+    function refreshPopover() {
+      const content = generatePopoverHTML();
+      bootstrap.Popover.getInstance(cartBtn)?.dispose();
+      cartBtn.setAttribute("data-bs-content", content);
+      new bootstrap.Popover(cartBtn, {
+        html: true,
+        sanitize: false,
+        trigger: "click",
+        placement: "bottom"
+      });
+    }
 
-    // Initial setup
-    updateCartCount();
-    refreshPopover();
+    updateCartCount();
+    refreshPopover();
 
-    // Event delegation
-    document.addEventListener("click", function (e) {
-      let target = e.target.closest("button");
+    document.addEventListener("click", function (e) {
+      let target = e.target.closest("button");
+      
+      // Corrected 'add to cart' logic
+      if (target && (target.classList.contains("btn-add-to-cart") || target.classList.contains("btn-add-to-cart-sm"))) {
+        const itemId = target.id;
+        const itemName = target.getAttribute("data-name");
+        const itemImage = target.getAttribute("data-image");
+        const itemPrice = target.getAttribute("data-price");
 
-      // Add to cart
-      if (target && target.classList.contains("add_to_cart")) {
-        const itemId = target.id;
-        const itemName = target.getAttribute("data-name");
-        const itemImage = target.getAttribute("data-image");
-        const itemPrice = target.getAttribute("data-price");
+        if (!itemId || !itemName) return;
 
-        if (!itemId || !itemName) return;
+        if (cart[itemId]) {
+          cart[itemId].qty += 1;
+        } else {
+          cart[itemId] = { name: itemName, qty: 1, image: itemImage, price: itemPrice };
+        }
+        localStorage.setItem("cart", JSON.stringify(cart));
+        updateCartCount();
+        refreshPopover();
 
-        if (cart[itemId]) {
-          cart[itemId].qty += 1;
-        } else {
-          cart[itemId] = { name: itemName, qty: 1 , image:itemImage , price:itemPrice };
-        }
+        cartBtn.classList.add("cart-added");
+        setTimeout(() => {
+          cartBtn.classList.remove("cart-added");
+        }, 500);
+      }
 
-        localStorage.setItem("cart", JSON.stringify(cart));
-        updateCartCount();
-        refreshPopover();
-      }
-    });
-  });
+      if (target && target.classList.contains("remove-item")) {
+        const itemId = target.getAttribute("data-id");
+        delete cart[itemId];
+        localStorage.setItem("cart", JSON.stringify(cart));
+        updateCartCount();
+        refreshPopover();
+      }
+    });
+  });
 </script>
 
-
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
-      crossorigin="anonymous"
-    ></script>
-  </body>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
+      crossorigin="anonymous"
+    ></script>
+  </body>
 </html>
