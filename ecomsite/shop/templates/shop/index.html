@@ -1,92 +1,331 @@
 {% extends 'shop/base.html' %}
 {% load static %}
-{% block style %}<link rel="stylesheet" href="{% static 'shop/style.css' %}" />{% endblock %}
-{% block body %}
 
-<div class="container my-5">
-  <div class="row mb-4">
-    <div class="col-md-10 offset-md-1">
-      <form class="search-form" method="GET">
-        <div class="search-input-group">
-          <input
-            type="search"
-            name="item_name"
-            placeholder="Search for products..."
-            class="form-control"
-            aria-label="Search"
-          />
-          <button type="submit" class="btn btn-search">
-            <i class="bi bi-search"></i>
-            <span>Search</span>
-          </button>
+{% block title %}Home - ModernShop{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section bg-primary text-white py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">Welcome to ModernShop</h1>
+                <p class="lead mb-4">Discover amazing products at unbeatable prices. Shop with confidence and enjoy premium customer service.</p>
+                <a href="#products" class="btn btn-light btn-lg">Shop Now</a>
+            </div>
+            <div class="col-lg-6">
+                <img src="https://via.placeholder.com/600x400/ffffff/0066cc?text=Shop+With+Us" alt="Shopping" class="img-fluid rounded">
+            </div>
         </div>
-      </form>
     </div>
-  </div>
+</section>
 
-  <div class="row">
-    {% for product in product_objects %}
-    <div class="col-lg-4 col-md-6 mb-4">
-      <div class="product-card">
-        <a href="details/{{ product.id }}" class="product-image-link">
-          <img
-            src="{{ product.image }}"
-            class="product-image"
-            alt="{{ product.title }}"
-          />
-        </a>
-        <div class="card-body">
-          <h6 class="card-title">{{ product.title }}</h6>
-          <p class="text-muted small">MRP: ₹{{ product.price }}</p>
-          <p class="text-success small price-highlight">
-            Now only ₹{{ product.discount_price }}
-          </p>
-          <p class="card-text small product-description">
-            {{ product.description }}
-          </p>
-          <div class="card-actions">
-            <a href="details/{{ product.id }}" class="btn btn-detail">
-              <i class="bi bi-info-circle"></i> Detail
-            </a>
-            <button
-              id="{{ product.id }}"
-              data-name="{{ product.title }}"
-              data-image="{{product.image}}"
-              data-price="{{product.discount_price}}"
-              class="btn btn-add-to-cart"
-            >
-              <i class="bi bi-cart-plus"></i> Add To Cart
-            </button>
-          </div>
+<!-- Categories Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-5">Shop by Category</h2>
+        <div class="row g-4">
+            {% for category in categories %}
+            <div class="col-md-4 col-lg-3">
+                <a href="{% url 'category_products' category.slug %}" class="text-decoration-none">
+                    <div class="card category-card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="bi bi-grid-3x3-gap fs-1 text-primary mb-3"></i>
+                            <h5 class="card-title">{{ category.name }}</h5>
+                            <p class="card-text text-muted small">{{ category.products.count }} products</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
         </div>
-      </div>
     </div>
-    {% endfor %}
-  </div>
+</section>
 
-  <div class="row mt-4">
-    <div class="col-md-6 offset-md-3 text-center">
-      <nav>
-        <ul class="pagination-custom">
-          {% if product_objects.has_previous %}
-          <li>
-            <a href="?page={{ product_objects.previous_page_number }}">Previous</a>
-          </li>
-          {% endif %}
-          <li class="current-page">
-            <span>
-              Page {{ product_objects.number }} of {{product_objects.paginator.num_pages }}
-            </span>
-          </li>
-          {% if product_objects.has_next %}
-          <li>
-            <a href="?page={{ product_objects.next_page_number }}">Next</a>
-          </li>
-          {% endif %}
-        </ul>
-      </nav>
+<!-- Products Section -->
+<section id="products" class="py-5">
+    <div class="container">
+        <div class="row">
+            <!-- Filters Sidebar -->
+            <div class="col-lg-3 mb-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="bi bi-funnel me-2"></i>Filters</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="GET" action="{% url 'index' %}">
+                            <!-- Search -->
+                            <div class="mb-3">
+                                <label class="form-label">Search</label>
+                                <input type="text" name="query" class="form-control" value="{{ request.GET.query }}" placeholder="Search products...">
+                            </div>
+                            
+                            <!-- Category Filter -->
+                            <div class="mb-3">
+                                <label class="form-label">Category</label>
+                                <select name="category" class="form-select">
+                                    <option value="">All Categories</option>
+                                    {% for category in categories %}
+                                    <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ category.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <!-- Price Range -->
+                            <div class="mb-3">
+                                <label class="form-label">Price Range</label>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <input type="number" name="min_price" class="form-control" placeholder="Min" value="{{ request.GET.min_price }}">
+                                    </div>
+                                    <div class="col-6">
+                                        <input type="number" name="max_price" class="form-control" placeholder="Max" value="{{ request.GET.max_price }}">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Sort By -->
+                            <div class="mb-3">
+                                <label class="form-label">Sort By</label>
+                                <select name="sort_by" class="form-select">
+                                    <option value="">Default</option>
+                                    <option value="price_low" {% if request.GET.sort_by == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+                                    <option value="price_high" {% if request.GET.sort_by == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+                                    <option value="newest" {% if request.GET.sort_by == 'newest' %}selected{% endif %}>Newest First</option>
+                                    <option value="rating" {% if request.GET.sort_by == 'rating' %}selected{% endif %}>Highest Rated</option>
+                                </select>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-search me-2"></i>Apply Filters
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Products Grid -->
+            <div class="col-lg-9">
+                <!-- Results Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="mb-0">
+                        {% if request.GET.query %}
+                            Search Results for "{{ request.GET.query }}"
+                        {% else %}
+                            All Products
+                        {% endif %}
+                        <span class="text-muted">({{ products.paginator.count }} items)</span>
+                    </h4>
+                    <div class="d-flex align-items-center">
+                        <span class="text-muted me-3">View:</span>
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-outline-primary active" data-view="grid">
+                                <i class="bi bi-grid"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-primary" data-view="list">
+                                <i class="bi bi-list"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Products Grid -->
+                <div class="row g-4" id="products-grid">
+                  {%csrf_token%}
+                    {% for product in products %}
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card product-card h-100 border-0 shadow-sm">
+                            <div class="position-relative">
+                                <img src="{{ product.image }}" class="card-img-top product-image" alt="{{ product.title }}">
+                                {% if product.discount_percentage > 0 %}
+                                <span class="badge bg-danger position-absolute top-0 end-0 m-2">
+                                    -{{ product.discount_percentage }}%
+                                </span>
+                                {% endif %}
+                                <div class="product-overlay">
+                                    <button class="btn btn-primary btn-sm quick-view" data-product-id="{{ product.id }}">
+                                        <i class="bi bi-eye"></i> Quick View
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body d-flex flex-column">
+                                <div class="mb-2">
+                                    <span class="badge bg-secondary">{{ product.category.name }}</span>
+                                </div>
+                                <h6 class="card-title">{{ product.title }}</h6>
+                                <div class="mb-2">
+                                    {% if product.rating > 0 %}
+                                    <div class="d-flex align-items-center">
+                                        <div class="text-warning me-1">
+                                            {% for i in "12345" %}
+                                            {% if forloop.counter <= product.rating %}
+                                            <i class="bi bi-star-fill"></i>
+                                            {% else %}
+                                            <i class="bi bi-star"></i>
+                                            {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                        <small class="text-muted">({{ product.num_reviews }})</small>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="price-section mb-3">
+                                    {% if product.discount_price %}
+                                    <span class="text-decoration-line-through text-muted">₹{{ product.price }}</span>
+                                    <span class="fs-5 fw-bold text-danger ms-2">₹{{ product.discount_price }}</span>
+                                    {% else %}
+                                    <span class="fs-5 fw-bold text-primary">₹{{ product.price }}</span>
+                                    {% endif %}
+                                </div>
+                                <div class="mt-auto">
+                                    <div class="d-grid gap-2">
+                                        <a href="{% url 'product_detail' product.id %}" class="btn btn-outline-primary">
+                                            <i class="bi bi-info-circle me-1"></i>View Details
+                                        </a>
+                                        <button class="btn btn-primary add-to-cart" 
+                                                data-product-id="{{ product.id }}"
+                                                data-product-name="{{ product.title }}"
+                                                data-product-price="{{ product.final_price }}"
+                                                data-product-image="{{ product.image }}">
+                                            <i class="bi bi-cart-plus me-1"></i>Add to Cart
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12">
+                        <div class="text-center py-5">
+                            <i class="bi bi-search fs-1 text-muted mb-3"></i>
+                            <h4 class="text-muted">No products found</h4>
+                            <p class="text-muted">Try adjusting your search criteria or browse our categories.</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Pagination -->
+                {% if products.has_other_pages %}
+                <nav aria-label="Products pagination" class="mt-5">
+                    <ul class="pagination justify-content-center">
+                        {% if products.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ products.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                <i class="bi bi-chevron-left"></i> Previous
+                            </a>
+                        </li>
+                        {% endif %}
+                        
+                        {% for num in products.paginator.page_range %}
+                        {% if products.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                        {% elif num > products.number|add:'-3' and num < products.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+                        </li>
+                        {% endif %}
+                        {% endfor %}
+                        
+                        {% if products.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ products.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                Next <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            </div>
+        </div>
     </div>
-  </div>
-</div>
+</section>
+{% endblock %}
 
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Add to cart functionality
+    $('.add-to-cart').click(function() {
+        const button = $(this);
+        const productId = button.data('product-id');
+        const productName = button.data('product-name');
+        const productPrice = button.data('product-price');
+        const productImage = button.data('product-image');
+        
+        $.ajax({
+            url: '{% url "add_to_cart" %}',
+            method: 'POST',
+            data: JSON.stringify({
+                product_id: productId,
+                quantity: 1
+            }),
+            contentType: 'application/json',
+            headers: {
+                'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Update cart count
+                    $('.cart-count').text(response.cart_count);
+                    
+                    // Show success message
+                    showAlert('Product added to cart!', 'success');
+                    
+                    // Button animation
+                    button.addClass('btn-success').removeClass('btn-primary');
+                    button.html('<i class="bi bi-check"></i> Added');
+                    
+                    setTimeout(function() {
+                        button.addClass('btn-primary').removeClass('btn-success');
+                        button.html('<i class="bi bi-cart-plus me-1"></i>Add to Cart');
+                    }, 2000);
+                }
+            },
+            error: function() {
+                showAlert('Error adding product to cart. Please try again.', 'danger');
+            }
+        });
+    });
+    
+    // Quick view functionality
+    $('.quick-view').click(function() {
+        const productId = $(this).data('product-id');
+        window.location.href = `/product/${productId}/`;
+    });
+    
+    // View toggle
+    $('[data-view]').click(function() {
+        $('[data-view]').removeClass('active');
+        $(this).addClass('active');
+        
+        const view = $(this).data('view');
+        if (view === 'list') {
+            $('#products-grid').addClass('list-view');
+        } else {
+            $('#products-grid').removeClass('list-view');
+        }
+    });
+    
+    function showAlert(message, type) {
+        const alert = $(`
+            <div class="alert alert-${type} alert-dismissible fade show position-fixed" 
+                 style="top: 20px; right: 20px; z-index: 9999;">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `);
+        $('body').append(alert);
+        
+        setTimeout(function() {
+            alert.alert('close');
+        }, 3000);
+    }
+});
+</script>
 {% endblock %}

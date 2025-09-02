@@ -1,282 +1,181 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Shop{% block title %} {% endblock %}</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr"
-      crossorigin="anonymous"
-    />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <script
-      src="https://code.jquery.com/jquery-3.7.1.js"
-      integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
-      crossorigin="anonymous"
-    ></script>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    {% block style %}{% endblock %}
-  </head>
-<style>
-  body {
-  background-color: #F5F5F5;
-  color: #333333;
-}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ModernShop - Your Premium Shopping Destination{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'shop/css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold fs-3 text-primary" href="{% url 'index' %}">
+                <i class="bi bi-shop me-2"></i>ModernShop
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'index' %}">
+                            <i class="bi bi-house me-1"></i>Home
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-grid me-1"></i>Categories
+                        </a>
+                        <ul class="dropdown-menu">
+                            {% for category in categories %}
+                            <li><a class="dropdown-item" href="{% url 'category_products' category.slug %}">{{ category.name }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'order_list' %}">
+                            <i class="bi bi-box me-1"></i>My Orders
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+                
+                <!-- Search Bar -->
+                <form class="d-flex me-3" method="GET" action="{% url 'index' %}">
+                    <div class="input-group">
+                        <input class="form-control" type="search" name="query" placeholder="Search products..." 
+                               value="{{ request.GET.query }}">
+                        <button class="btn btn-outline-primary" type="submit">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </form>
+                
+                <!-- User Menu -->
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle me-1"></i>{{ user.username }}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'order_list' %}">My Orders</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">
+                            <i class="bi bi-box-arrow-in-right me-1"></i>Login
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'register' %}">
+                            <i class="bi bi-person-plus me-1"></i>Register
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    <!-- Cart -->
+                    <li class="nav-item">
+                        <a class="nav-link position-relative" href="{% url 'cart' %}">
+                            <i class="bi bi-cart3 fs-5"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-count">
+                                {{ request.user.cart.total_items|default:"0" }}
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-/* === Navbar Styles === */
-.navbar {
-  border-bottom: 1px solid #e0e0e0;
-}
+    <!-- Messages -->
+    {% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
 
-.navbar-brand {
-  color: #4ECDC4 !important;
-  font-weight: 700;
-  font-size: 1.5rem;
-}
+    <!-- Main Content -->
+    <main class="min-vh-100">
+        {% block content %}{% endblock %}
+    </main>
 
-.nav-link {
-  color: #555555 !important;
-  font-weight: 500;
-  margin-right: 1rem;
-  transition: color 0.3s ease;
-}
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-5 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5 class="mb-3">ModernShop</h5>
+                    <p class="">Your premium shopping destination with the best products and customer service.</p>
+                    <div class="social-links">
+                        <a href="#" class="text-light me-3"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="text-light me-3"><i class="bi bi-twitter"></i></a>
+                        <a href="#" class="text-light me-3"><i class="bi bi-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <h6 class="mb-3">Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'index' %}" class="text-decoration-none">Home</a></li>
+                        <li><a href="#" class=" text-decoration-none">About Us</a></li>
+                        <li><a href="#" class=" text-decoration-none">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h6 class="mb-3">Customer Service</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class=" text-decoration-none">Help Center</a></li>
+                        <li><a href="#" class=" text-decoration-none">Shipping Info</a></li>
+                        <li><a href="#" class=" text-decoration-none">Returns</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h6 class="mb-3">Newsletter</h6>
+                    <p class="">Subscribe for updates and exclusive offers.</p>
+                    <form class="d-flex">
+                        <input type="email" class="form-control me-2" placeholder="Your email">
+                        <button type="submit" class="btn btn-primary">Subscribe</button>
+                    </form>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="mb-0 ">&copy; 2024 ModernShop. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <img src="https://static-assets-web.flixcart.com/batman-returns/batman-returns/p/images/payment-method-c454fb.svg" alt="Secure Payment" class="img-fluid">
+                </div>
+            </div>
+        </div>
+    </footer>
 
-.nav-link:hover {
-  color: #000000 !important;
-}
-
-/* === Cart Button Styles === */
-.btn-outline-primary {
-  color: #4ECDC4;
-  border-color: #4ECDC4;
-  transition: all 0.3s ease;
-}
-
-.btn-outline-primary:hover,
-.btn-outline-primary.cart-active {
-  background-color: #4ECDC4;
-  color: #fff;
-}
-
-.cart-added {
-  animation: cart-pulse 0.5s ease-in-out;
-}
-
-@keyframes cart-pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
-}
-
-/* === Popover & Cart Items Styles === */
-.popover {
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  min-width: 300px;
-}
-
-.popover-header {
-  background-color: #f8f9fa;
-  font-weight: 600;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.list-group-item {
-  border: none;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.list-group-item:last-child {
-  border-bottom: none;
-}
-
-.cart-item-image {
-  width: 50px;
-  height: 50px;
-  object-fit: contain;
-  border-radius: 4px;
-}
-
-.remove-item {
-  background-color: transparent;
-  border: none;
-  color: #dc3545;
-  font-size: 1.25rem;
-  transition: color 0.3s ease;
-}
-
-.remove-item:hover {
-  color: #a71d2a;
-}
-
-.btn-checkout {
-  background-color: #4ECDC4;
-  color: #fff;
-  font-weight: 600;
-  transition: background-color 0.3s ease;
-  border: none;
-}
-
-.btn-checkout:hover {
-  background-color: #3ba39b;
-}
-</style>
-  <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-white py-3 shadow-sm">
-      <div class="container-fluid">
-        <a class="navbar-brand fw-bold fs-4 text-primary" href="/">MyShop</a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarSupportedContent"
-          aria-controls="navbarSupportedContent"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="/">Home</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Dropdown
-              </a>
-              <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <li><a class="dropdown-item" href="#">Action</a></li>
-                <li><a class="dropdown-item" href="#">Another action</a></li>
-                <li><hr class="dropdown-divider" /></li>
-                <li><a class="dropdown-item" href="#">Something else here</a></li>
-              </ul>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
-            </li>
-          </ul>
-          <div class="d-flex ms-auto">
-            <button
-              type="button"
-              id="cart"
-              class="btn btn-outline-primary"
-              data-bs-toggle="popover"
-              data-bs-html="true"
-              data-bs-trigger="focus"
-              data-bs-placement="bottom"
-              title="Your Cart"
-              data-bs-content="Loading..."
-            >
-              <i class="bi bi-cart3"></i> Cart (<span id="cart-count">0</span>)
-            </button>
-          </div>
-        </div>
-      </div>
-    </nav>
-    {% block body %} {% endblock %}
-
-<script type="text/javascript">
-  document.addEventListener("DOMContentLoaded", function () {
-    const cartBtn = document.getElementById("cart");
-    const cartCountSpan = document.getElementById("cart-count");
-    let cart = JSON.parse(localStorage.getItem("cart")) || {};
-
-    function updateCartCount() {
-      const count = Object.keys(cart).length;
-      cartCountSpan.textContent = count;
-      if (count > 0) {
-        cartBtn.classList.add('cart-active');
-      } else {
-        cartBtn.classList.remove('cart-active');
-      }
-    }
-
-    function generatePopoverHTML() {
-      let html = '<ul class="list-group list-group-flush">';
-      if (Object.keys(cart).length === 0) {
-        html += '<li class="list-group-item text-center text-muted">Your cart is empty</li>';
-      } else {
-        for (let itemId in cart) {
-          const item = cart[itemId];
-          html += `
-            <li class="list-group-item d-flex align-items-center py-2">
-              <img src="${item.image}" alt="${item.name}" class="cart-item-image me-3">
-              <div class="flex-grow-1">
-                <strong class="d-block">${item.name}</strong>
-                <small class="text-muted">Qty: ${item.qty} | Price: ₹${item.price}</small>
-              </div>
-              <button class="btn btn-sm btn-danger remove-item ms-auto" data-id="${itemId}">
-                <i class="bi bi-trash"></i>
-              </button>
-            </li>`;
-        }
-      }
-      html += '</ul>';
-      html += '<a class="btn btn-checkout mt-3 w-100" href="/checkout/" role="button">Checkout</a>';
-      return html;
-    }
-
-    function refreshPopover() {
-      const content = generatePopoverHTML();
-      bootstrap.Popover.getInstance(cartBtn)?.dispose();
-      cartBtn.setAttribute("data-bs-content", content);
-      new bootstrap.Popover(cartBtn, {
-        html: true,
-        sanitize: false,
-        trigger: "click",
-        placement: "bottom"
-      });
-    }
-
-    updateCartCount();
-    refreshPopover();
-
-    document.addEventListener("click", function (e) {
-      let target = e.target.closest("button");
-      
-      // Corrected 'add to cart' logic
-      if (target && (target.classList.contains("btn-add-to-cart") || target.classList.contains("btn-add-to-cart-sm"))) {
-        const itemId = target.id;
-        const itemName = target.getAttribute("data-name");
-        const itemImage = target.getAttribute("data-image");
-        const itemPrice = target.getAttribute("data-price");
-
-        if (!itemId || !itemName) return;
-
-        if (cart[itemId]) {
-          cart[itemId].qty += 1;
-        } else {
-          cart[itemId] = { name: itemName, qty: 1, image: itemImage, price: itemPrice };
-        }
-        localStorage.setItem("cart", JSON.stringify(cart));
-        updateCartCount();
-        refreshPopover();
-
-        cartBtn.classList.add("cart-added");
-        setTimeout(() => {
-          cartBtn.classList.remove("cart-added");
-        }, 500);
-      }
-
-      if (target && target.classList.contains("remove-item")) {
-        const itemId = target.getAttribute("data-id");
-        delete cart[itemId];
-        localStorage.setItem("cart", JSON.stringify(cart));
-        updateCartCount();
-        refreshPopover();
-      }
-    });
-  });
-</script>
-
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
-      crossorigin="anonymous"
-    ></script>
-  </body>
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- Custom JS -->
+    <script src="{% static 'shop/js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
 </html>

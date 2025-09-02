@@ -1,0 +1,147 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}Login - ModernShop{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4 class="mb-0">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Welcome Back
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" id="login-form">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-person"></i>
+                                </span>
+                                <input type="text" class="form-control" id="username" name="username" 
+                                       placeholder="Enter your username" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-lock"></i>
+                                </span>
+                                <input type="password" class="form-control" id="password" name="password" 
+                                       placeholder="Enter your password" required>
+                                <button class="btn btn-outline-secondary" type="button" id="toggle-password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="remember-me">
+                            <label class="form-check-label" for="remember-me">
+                                Remember me
+                            </label>
+                        </div>
+                        
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                            </button>
+                        </div>
+                        
+                        <div class="text-center">
+                            <p class="mb-0">
+                                Don't have an account? 
+                                <a href="{% url 'register' %}" class="text-primary text-decoration-none">Sign up here</a>
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Social Login -->
+            <div class="card border-0 shadow-sm mt-3">
+                <div class="card-body p-4">
+                    <div class="text-center mb-3">
+                        <span class="text-muted">Or continue with</span>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-dark">
+                            <i class="bi bi-google me-2"></i>Continue with Google
+                        </button>
+                        <button class="btn btn-outline-primary">
+                            <i class="bi bi-facebook me-2"></i>Continue with Facebook
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Toggle password visibility
+    $('#toggle-password').click(function() {
+        const passwordInput = $('#password');
+        const icon = $(this).find('i');
+        
+        if (passwordInput.attr('type') === 'password') {
+            passwordInput.attr('type', 'text');
+            icon.removeClass('bi-eye').addClass('bi-eye-slash');
+        } else {
+            passwordInput.attr('type', 'password');
+            icon.removeClass('bi-eye-slash').addClass('bi-eye');
+        }
+    });
+    
+    // Form validation
+    $('#login-form').submit(function(e) {
+        const username = $('#username').val().trim();
+        const password = $('#password').val();
+        
+        if (!username) {
+            e.preventDefault();
+            $('#username').addClass('is-invalid');
+            showAlert('Please enter your username', 'danger');
+            return false;
+        }
+        
+        if (!password) {
+            e.preventDefault();
+            $('#password').addClass('is-invalid');
+            showAlert('Please enter your password', 'danger');
+            return false;
+        }
+    });
+    
+    // Remove validation classes on input
+    $('input').on('input', function() {
+        $(this).removeClass('is-invalid');
+    });
+    
+    function showAlert(message, type) {
+        const alert = $(`
+            <div class="alert alert-${type} alert-dismissible fade show position-fixed" 
+                 style="top: 20px; right: 20px; z-index: 9999;">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `);
+        $('body').append(alert);
+        
+        setTimeout(function() {
+            alert.alert('close');
+        }, 3000);
+    }
+});
+</script>
+{% endblock %}

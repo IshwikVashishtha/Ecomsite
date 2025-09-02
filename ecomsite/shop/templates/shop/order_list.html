@@ -1,0 +1,150 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}My Orders - ModernShop{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">
+                    <i class="bi bi-box me-2"></i>My Orders
+                </h2>
+                <a href="{% url 'index' %}" class="btn btn-outline-primary">
+                    <i class="bi bi-arrow-left me-2"></i>Continue Shopping
+                </a>
+            </div>
+            
+            {% if orders %}
+            <div class="row">
+                {% for order in orders %}
+                <div class="col-12 mb-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-light">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <h6 class="mb-0">
+                                        <i class="bi bi-receipt me-2"></i>Order #{{ order.order_id|slice:":8" }}
+                                    </h6>
+                                    <small class="text-muted">Placed on {{ order.created_at|date:"M d, Y" }}</small>
+                                </div>
+                                <div class="col-md-6 text-md-end">
+                                    <span class="badge bg-{% if order.status == 'delivered' %}success{% elif order.status == 'cancelled' %}danger{% elif order.status == 'shipped' %}info{% else %}warning{% endif %}">
+                                        {{ order.get_status_display }}
+                                    </span>
+                                    <span class="badge bg-{% if order.payment_status == 'paid' %}success{% elif order.payment_status == 'failed' %}danger{% else %}warning{% endif %} ms-2">
+                                        {{ order.get_payment_status_display }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="order-items">
+                                        {% for item in order.items.all %}
+                                        <div class="d-flex align-items-center mb-3">
+                                            <img src="{{ item.product.image }}" alt="{{ item.product.title }}" 
+                                                 class="rounded me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-1">{{ item.product.title }}</h6>
+                                                <small class="text-muted">Qty: {{ item.quantity }} | Price: ₹{{ item.price }}</small>
+                                            </div>
+                                            <div class="text-end">
+                                                <strong>₹{{ item.total_price }}</strong>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="order-summary">
+                                        <h6 class="mb-3">Order Summary</h6>
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>Subtotal:</span>
+                                            <span>₹{{ order.subtotal }}</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>Shipping:</span>
+                                            <span class="text-success">Free</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>Tax:</span>
+                                            <span>₹{{ order.tax }}</span>
+                                        </div>
+                                        <hr>
+                                        <div class="d-flex justify-content-between mb-3">
+                                            <strong>Total:</strong>
+                                            <strong class="text-primary">₹{{ order.total_amount }}</strong>
+                                        </div>
+                                        
+                                        <div class="d-grid gap-2">
+                                            <a href="{% url 'order_detail' order.order_id %}" class="btn btn-outline-primary btn-sm">
+                                                <i class="bi bi-eye me-1"></i>View Details
+                                            </a>
+                                            {% if order.status == 'pending' %}
+                                            <button class="btn btn-outline-danger btn-sm">
+                                                <i class="bi bi-x-circle me-1"></i>Cancel Order
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Pagination -->
+            {% if orders.has_other_pages %}
+            <nav aria-label="Orders pagination" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if orders.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ orders.previous_page_number }}">
+                            <i class="bi bi-chevron-left"></i> Previous
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for num in orders.paginator.page_range %}
+                    {% if orders.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                    {% elif num > orders.number|add:'-3' and num < orders.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+                    
+                    {% if orders.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ orders.next_page_number }}">
+                            Next <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+            
+            {% else %}
+            <!-- Empty State -->
+            <div class="text-center py-5">
+                <i class="bi bi-box fs-1 text-muted mb-3"></i>
+                <h4 class="text-muted">No orders yet</h4>
+                <p class="text-muted mb-4">You haven't placed any orders yet. Start shopping to see your order history here.</p>
+                <a href="{% url 'index' %}" class="btn btn-primary btn-lg">
+                    <i class="bi bi-shop me-2"></i>Start Shopping
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

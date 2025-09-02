@@ -1,0 +1,290 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}Order Details - ModernShop{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'order_list' %}">My Orders</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Order Details</li>
+                </ol>
+            </nav>
+            
+            <!-- Order Header -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h4 class="mb-0">
+                                <i class="bi bi-receipt me-2"></i>Order #{{ order.order_id|slice:":8" }}
+                            </h4>
+                            <small>Placed on {{ order.created_at|date:"F d, Y at g:i A" }}</small>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <div class="mb-2">
+                                <span class="badge bg-{% if order.status == 'delivered' %}success{% elif order.status == 'cancelled' %}danger{% elif order.status == 'shipped' %}info{% else %}warning{% endif %} fs-6">
+                                    {{ order.get_status_display }}
+                                </span>
+                                <span class="badge bg-{% if order.payment_status == 'paid' %}success{% elif order.payment_status == 'failed' %}danger{% else %}warning{% endif %} fs-6 ms-2">
+                                    {{ order.get_payment_status_display }}
+                                </span>
+                            </div>
+                            <div class="text-white-50">
+                                <strong>Total: ₹{{ order.total_amount }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <!-- Order Items -->
+                <div class="col-lg-8">
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">
+                                <i class="bi bi-box me-2"></i>Order Items ({{ order.items.count }})
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% for item in order.items.all %}
+                            <div class="order-item border-bottom pb-3 mb-3">
+                                <div class="row align-items-center">
+                                    <div class="col-md-2">
+                                        <img src="{{ item.product.image }}" alt="{{ item.product.title }}" 
+                                             class="img-fluid rounded" style="width: 80px; height: 80px; object-fit: cover;">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="mb-1">{{ item.product.title }}</h6>
+                                        <p class="text-muted mb-1">{{ item.product.category.name }}</p>
+                                        <small class="text-muted">Quantity: {{ item.quantity }}</small>
+                                    </div>
+                                    <div class="col-md-2 text-center">
+                                        <div class="price-info">
+                                            <span class="text-muted">₹{{ item.price }} each</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 text-end">
+                                        <strong class="text-primary">₹{{ item.total_price }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <!-- Order Timeline -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">
+                                <i class="bi bi-clock-history me-2"></i>Order Timeline
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="timeline">
+                                <div class="timeline-item">
+                                    <div class="timeline-marker bg-success"></div>
+                                    <div class="timeline-content">
+                                        <h6 class="mb-1">Order Placed</h6>
+                                        <p class="text-muted mb-0">{{ order.created_at|date:"F d, Y at g:i A" }}</p>
+                                    </div>
+                                </div>
+                                
+                                {% if order.status != 'pending' %}
+                                <div class="timeline-item">
+                                    <div class="timeline-marker bg-primary"></div>
+                                    <div class="timeline-content">
+                                        <h6 class="mb-1">Order Confirmed</h6>
+                                        <p class="text-muted mb-0">{{ order.updated_at|date:"F d, Y at g:i A" }}</p>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                {% if order.status == 'shipped' or order.status == 'delivered' %}
+                                <div class="timeline-item">
+                                    <div class="timeline-marker bg-info"></div>
+                                    <div class="timeline-content">
+                                        <h6 class="mb-1">Order Shipped</h6>
+                                        <p class="text-muted mb-0">Your order is on its way</p>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                {% if order.status == 'delivered' %}
+                                <div class="timeline-item">
+                                    <div class="timeline-marker bg-success"></div>
+                                    <div class="timeline-content">
+                                        <h6 class="mb-1">Order Delivered</h6>
+                                        <p class="text-muted mb-0">Your order has been delivered</p>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Order Summary -->
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">
+                                <i class="bi bi-calculator me-2"></i>Order Summary
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="summary-item d-flex justify-content-between mb-2">
+                                <span>Subtotal:</span>
+                                <span>₹{{ order.subtotal }}</span>
+                            </div>
+                            <div class="summary-item d-flex justify-content-between mb-2">
+                                <span>Shipping:</span>
+                                <span class="text-success">Free</span>
+                            </div>
+                            <div class="summary-item d-flex justify-content-between mb-2">
+                                <span>Tax:</span>
+                                <span>₹{{ order.tax }}</span>
+                            </div>
+                            <hr>
+                            <div class="summary-item d-flex justify-content-between mb-3">
+                                <strong>Total:</strong>
+                                <strong class="text-primary fs-5">₹{{ order.total_amount }}</strong>
+                            </div>
+                            
+                            {% if order.payment_status == 'paid' %}
+                            <div class="alert alert-success">
+                                <i class="bi bi-check-circle me-2"></i>Payment completed
+                            </div>
+                            {% elif order.payment_status == 'pending' %}
+                            <div class="alert alert-warning">
+                                <i class="bi bi-clock me-2"></i>Payment pending
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Shipping Information -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">
+                                <i class="bi bi-truck me-2"></i>Shipping Information
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="shipping-info">
+                                <h6 class="mb-2">{{ order.name }}</h6>
+                                <p class="text-muted mb-1">{{ order.address }}</p>
+                                <p class="text-muted mb-1">{{ order.city }}, {{ order.state }} {{ order.zipcode }}</p>
+                                <p class="text-muted mb-1">Phone: {{ order.phone }}</p>
+                                <p class="text-muted mb-0">Email: {{ order.email }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Payment Information -->
+                    {% if order.payment_status == 'paid' %}
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">
+                                <i class="bi bi-credit-card me-2"></i>Payment Information
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="payment-info">
+                                <p class="text-muted mb-1">Payment Method: {{ order.payment_method|default:"Online Payment" }}</p>
+                                {% if order.razorpay_payment_id %}
+                                <p class="text-muted mb-0">Transaction ID: {{ order.razorpay_payment_id }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Order Actions -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">
+                                <i class="bi bi-gear me-2"></i>Order Actions
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'order_list' %}" class="btn btn-outline-primary">
+                                    <i class="bi bi-arrow-left me-2"></i>Back to Orders
+                                </a>
+                                <button class="btn btn-outline-secondary" onclick="window.print()">
+                                    <i class="bi bi-printer me-2"></i>Print Invoice
+                                </button>
+                                {% if order.status == 'pending' %}
+                                <button class="btn btn-outline-danger">
+                                    <i class="bi bi-x-circle me-2"></i>Cancel Order
+                                </button>
+                                {% endif %}
+                                {% if order.status == 'delivered' %}
+                                <button class="btn btn-outline-success">
+                                    <i class="bi bi-star me-2"></i>Write Review
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e9ecef;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -22px;
+    top: 0;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 2px #e9ecef;
+}
+
+.timeline-content {
+    padding-left: 20px;
+}
+
+@media print {
+    .btn, .breadcrumb {
+        display: none !important;
+    }
+    
+    .card {
+        box-shadow: none !important;
+        border: 1px solid #dee2e6 !important;
+    }
+}
+</style>
+{% endblock %}
