@@ -85,14 +85,14 @@ A fully-featured, modern e-commerce platform built with Django, featuring a beau
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/IshwikVashishtha/Ecomsite.git
    cd ecomsite
    ```
 
 2. **Create virtual environment**
    ```bash
    python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   .venv/bin/activate  # On Mac/Linux: Source venv\Scripts\activate
    ```
 
 3. **Install dependencies**
@@ -270,20 +270,6 @@ python manage.py test
 ## 📄 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 🆘 Support
-
-For support and questions:
-- Create an issue in the repository
-- Contact: [your-email@example.com]
-
-## 🔄 Version History
-
-- **v1.0.0**: Initial release with core e-commerce functionality
-- **v1.1.0**: Added payment integration and order management
-- **v1.2.0**: Enhanced UI/UX and responsive design
-- **v1.3.0**: Added review system and advanced filtering
-
 ## 🙏 Acknowledgments
 
 - Django community for the excellent framework
